@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import static java.lang.Integer.toBinaryString;
 import static main.Assembler.*;
 import static main.InstructionType.*;
+import static main.InstructionType.SHIFT;
 
 /**
  * Definition des instructions.
@@ -44,10 +45,10 @@ enum Instructions
     ADD_I(addImmediate(),           "ADD",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, SECOND_OPERAND_GROUP, TWO_OPERAND_OFFSET),
     SUB(addSub(1),                          INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, SECOND_OPERAND_GROUP, THIRD_OPERAND),
     MOV(move(),                             INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_OFFSET),
-    STR(loadStore(0),               "STR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_OFFSET),
-    STR_R(loadStoreWithRegister(0), "STR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_REGISTER, ADDRESSING_OFFSET_REGISTER),
-    LDR(loadStore(1),               "LDR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_OFFSET),
-    LDR_R(loadStoreWithRegister(1), "LDR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_REGISTER, ADDRESSING_OFFSET_REGISTER),
+    STR_I(loadStoreImm8(0),        "STR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_OFFSET),
+    STR_R(loadStoreImm8R(0),       "STR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_REGISTER, ADDRESSING_OFFSET_REGISTER),
+    LDR_I(loadStoreImm8(1),        "LDR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_OFFSET),
+    LDR_R(loadStoreImm8R(1),       "LDR",  INSTRUCTION_GROUP, FIRST_OPERAND_GROUP, ADDRESSING_REGISTER, ADDRESSING_OFFSET_REGISTER),
     B(m -> "11011110",      BRANCH, "B",    INSTRUCTION_GROUP, BRANCH_LABEL_GROUP),
     BC(branchConditional(), BRANCH, "B",    INSTRUCTION_GROUP, CONDITION_GROUP, BRANCH_LABEL_GROUP),
     UNKNOWN_INSTRUCTION(m -> String.format("%16s", " "));
@@ -163,8 +164,18 @@ enum Instructions
         return m -> String.format("0110%s%5s%3s%3s", toBinaryString(ordinal), toBinaryString(Integer.valueOf(m.group(ADDRESSING_OFFSET_REGISTER))), toBinaryString(Integer.valueOf(m.group(ADDRESSING_REGISTER))), toBinaryString(Integer.valueOf(m.group(FIRST_OPERAND_GROUP))));
     }
 
+    private static Opcode loadStoreImm8(int ordinal)
+    {
+        return m -> String.format("1001%s%3s%8s", toBinaryString(ordinal), toBinaryString(Integer.valueOf(m.group(FIRST_OPERAND_GROUP))), toBinaryString(Integer.valueOf(m.group(ADDRESSING_OFFSET))));
+    }
+
+    private static Opcode loadStoreImm8R(int ordinal)
+    {
+        return m -> String.format("1001%s%3s%8s", toBinaryString(ordinal), toBinaryString(Integer.valueOf(m.group(FIRST_OPERAND_GROUP))), toBinaryString(Integer.valueOf(m.group(ADDRESSING_OFFSET_REGISTER))));
+    }
+
     private static Opcode branchConditional()
     {
-        return m -> String.format("1101%4s", toBinaryString(Condition.valueOf(m.group(4).toUpperCase()).ordinal()));
+        return m -> String.format("1101%4s", toBinaryString(Condition.valueOf(m.group(CONDITION_GROUP).toUpperCase()).ordinal()));
     }
 }

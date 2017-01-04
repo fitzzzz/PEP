@@ -126,7 +126,7 @@ public class Assembler
      * Numero de l'instruction en cours de traitement.
      * (appartient a [0...n] avec n le nombre total d'instruction contenue dans le programme)
      */
-    private long step;
+    private long programCounter;
 
     /**
      * Initialise l'input et l'output de l'assembleur.
@@ -152,7 +152,7 @@ public class Assembler
     private void build() throws IOException
     {
         // Initialise le nombre d'instruction à 0
-        step = 0;
+        programCounter = 0;
         // Lit et applique le pattern sur chaque ligne du fichier
         for (String line = file.readLine(); line != null; line = file.readLine())
         {
@@ -180,7 +180,7 @@ public class Assembler
 
         // Si un label est présent, ajout du label à la table des labels
         if (matcher.group(1) != null)
-            link.put(matcher.group(LABEL_GROUP), step);
+            link.put(matcher.group(LABEL_GROUP), programCounter);
 
         // Si aucune instruction n'est trouvé (i.e une ligne avec uniquement un label), renvoie la chaine vide ""
         if (matcher.group(2) == null)
@@ -211,7 +211,7 @@ public class Assembler
         }
 
         // Une instruction de plus a été traitée
-        step += 1;
+        programCounter += 1;
 
         // Convertion de l'opcode en hexadecimal
         return Integer.toHexString(Integer.parseInt(binaryOpcode, 2)) + " ";
@@ -226,7 +226,7 @@ public class Assembler
     private void findLabel(String label) throws IOException
     {
         // Demarre a l'instruction actuel
-        long temp = step;
+        long temp = programCounter;
 
         // Sauvegarde la position actuelle de lecture du fichier source
         long backup = file.getFilePointer();
